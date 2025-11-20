@@ -1,4 +1,4 @@
-package dev.community.online_player_server_api;
+package dev.community.onlineplayerserverapi;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

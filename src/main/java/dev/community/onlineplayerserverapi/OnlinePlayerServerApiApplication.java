@@ -1,4 +1,4 @@
-package dev.community.online_player_server_api;
+package dev.community.onlineplayerserverapi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
