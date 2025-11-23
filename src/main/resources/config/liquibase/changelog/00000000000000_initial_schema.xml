@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="cristian-raileanu">
+        <createTable tableName="T_PLAYER">
+            <column name="id" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="nick_name" type="VARCHAR2(20)"/>
+            <column name="email" type="VARCHAR2(20)"/>
+            <column name="password_hash" type="VARCHAR2(20)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="cristian-raileanu " >
+        <addAutoIncrement catalogName="online_players"
+                          columnDataType="int"
+                          columnName="id"
+                          defaultOnNull="false"
+                          generationType="ALWAYS"
+                          schemaName="public"
+                          startWith="100"
+                          tableName="T_PLAYER"/>
+    </changeSet>
+
+</databaseChangeLog>
