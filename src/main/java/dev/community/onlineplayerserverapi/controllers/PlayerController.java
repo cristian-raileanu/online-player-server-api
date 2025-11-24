@@ -14,14 +14,14 @@ public class PlayerController {
 
     private PlayerService playerService;
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public LoginResponseDto login(@RequestBody PlayerDto playerDto) {
         return playerService.login(playerDto);
     }
 
     @GetMapping("/player-exists")
-    public Boolean playerExists(@RequestBody PlayerDto playerDto) {
-        return playerService.isPlayerExisting(playerDto.getNickName());
+    public Boolean playerExists(@RequestParam String nickName) {
+        return playerService.isPlayerExisting(nickName);
     }
 
     @PutMapping("/register")
