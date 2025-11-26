@@ -1,8 +1,6 @@
 package dev.community.onlineplayerserverapi.services;
 
-import dev.community.onlineplayerserverapi.models.LoginResponseDto;
-import dev.community.onlineplayerserverapi.models.PlayerDto;
-import dev.community.onlineplayerserverapi.models.RegisterResponseDto;
+import dev.community.onlineplayerserverapi.models.*;
 
 public interface PlayerService {
 
@@ -11,4 +9,6 @@ public interface PlayerService {
     RegisterResponseDto register(PlayerDto playerDto);
 
     boolean isPlayerExisting(String nickName);
+
+    PlayerDetailsResponseDto getPlayerDetailsPage(PlayerDetailsRequestDto playerDetailsRequestDto);
 }

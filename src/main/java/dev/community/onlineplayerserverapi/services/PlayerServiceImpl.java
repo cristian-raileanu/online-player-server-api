@@ -2,16 +2,15 @@ package dev.community.onlineplayerserverapi.services;
 
 import dev.community.onlineplayerserverapi.entities.Player;
 import dev.community.onlineplayerserverapi.mappers.PlayerMapper;
-import dev.community.onlineplayerserverapi.models.LoginResponseDto;
-import dev.community.onlineplayerserverapi.models.LoginStatus;
-import dev.community.onlineplayerserverapi.models.PlayerDto;
-import dev.community.onlineplayerserverapi.models.RegisterResponseDto;
+import dev.community.onlineplayerserverapi.models.*;
 import dev.community.onlineplayerserverapi.repositories.PlayerRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -84,6 +83,31 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public boolean isPlayerExisting(String nickName) {
         return doesPlayerWithNicknameExist(nickName);
+    }
+
+    @Override
+    public PlayerDetailsResponseDto getPlayerDetailsPage(PlayerDetailsRequestDto playerDetailsRequestDto) {
+        boolean showAll = playerDetailsRequestDto.getPage() == null || playerDetailsRequestDto.getPageSize() == null;
+
+        List<Player> selectedPlayers = showAll ? playerRepository.findAll() : List.of();
+        Set<String> includedFields = playerDetailsRequestDto.getIncludes() != null ?
+                playerDetailsRequestDto.getIncludes() : Set.of();
+
+        PlayerDetailsResponseDto playerDetailsResponseDto = new PlayerDetailsResponseDto();
+        playerDetailsResponseDto.setPlayerDetails(selectedPlayers.stream()
+                .map(player -> playerDetailsPartialMap(player, includedFields))
+                .toList());
+        playerDetailsResponseDto.setTotalPlayers(showAll ? playerDetailsResponseDto.getPlayerDetails().size() :
+                (int) playerRepository.count());
+        return playerDetailsResponseDto;
+    }
+
+    private PlayerDetailsDto playerDetailsPartialMap(Player player, Set<String> includedFields) {
+        PlayerDetailsDto playerDetailsDto = new PlayerDetailsDto();
+        if (includedFields.contains("nickName")) {
+            playerDetailsDto.setNickName(player.getNickName());
+        }
+        return playerDetailsDto;
     }
 
     private boolean doesPlayerWithNicknameExist(String nickName) {
