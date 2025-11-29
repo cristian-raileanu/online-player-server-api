@@ -25,4 +25,36 @@
                           tableName="T_PLAYER"/>
     </changeSet>
 
+    <changeSet id="3" author="cristian-raileanu">
+        <createTable tableName="T_PLAYER_SESSION">
+            <column name="id" type="INT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="player_id" type="INT">
+                <constraints nullable="false" foreignKeyName="fk_player_session_player" references="T_PLAYER(id)"/>
+            </column>
+            <column name="session_token" type="VARCHAR(40)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="login_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_activity_time" type="timestamp"/>
+            <column name="is_closed" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="cristian-raileanu">
+        <addAutoIncrement catalogName="online_players"
+                          columnDataType="int"
+                          columnName="id"
+                          defaultOnNull="false"
+                          generationType="ALWAYS"
+                          schemaName="public"
+                          tableName="T_PLAYER_SESSION"
+                          startWith="1000"/>
+    </changeSet>
+
 </databaseChangeLog>

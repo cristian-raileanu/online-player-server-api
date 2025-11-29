@@ -27,6 +27,11 @@ public class PlayerController {
         return playerService.login(playerDto);
     }
 
+    @PostMapping("/logout")
+    public LoginResponseDto logout(@RequestBody String token) {
+        return playerService.logout(token);
+    }
+
     @PutMapping("/register")
     public RegisterResponseDto register(@RequestBody PlayerDto playerDto) {
         return playerService.register(playerDto);

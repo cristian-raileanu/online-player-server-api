@@ -8,4 +8,6 @@ public class PlayerDetailsDto {
     private String nickName;
 
     private String country;
+
+    private Long totalPlayTime;
 }

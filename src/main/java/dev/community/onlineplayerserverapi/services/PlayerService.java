@@ -6,6 +6,8 @@ public interface PlayerService {
 
     LoginResponseDto login(PlayerDto playerDto);
 
+    LoginResponseDto logout(String token);
+
     RegisterResponseDto register(PlayerDto playerDto);
 
     boolean isPlayerExisting(String nickName);
