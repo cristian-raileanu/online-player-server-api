@@ -92,14 +92,12 @@ public class PlayerServiceImpl implements PlayerService {
 
         Player createdPlayer = playerMapper.toEntity(playerDto);
 
-        Player savedPlayer = playerRepository.save(createdPlayer);
-
-        String sessionToken = sessionService.createPlayerSession(savedPlayer.getId());
+        playerRepository.save(createdPlayer);
 
         return RegisterResponseDto.builder()
                 .loginStatus(LoginStatus.SUCCESS)
-                .token(sessionToken)
                 .build();
+
     }
 
     @Override
