@@ -1,6 +1,7 @@
 package dev.community.onlineplayerserverapi.services;
 
 import dev.community.onlineplayerserverapi.entities.Player;
+import dev.community.onlineplayerserverapi.entities.PlayerSession;
 import dev.community.onlineplayerserverapi.mappers.PlayerMapper;
 import dev.community.onlineplayerserverapi.models.*;
 import dev.community.onlineplayerserverapi.repositories.PlayerRepository;
@@ -18,15 +19,17 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 public class PlayerServiceImpl implements PlayerService {
 
-    private PlayerRepository playerRepository;
-
-    private PlayerMapper playerMapper;
-
-    private SessionService sessionService;
+    private final PlayerRepository playerRepository;
+    private final PlayerMapper playerMapper;
+    private final SessionService sessionService;
+    private final GameService gameService;
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$"
     );
+
+    private static final int MAX_SIZE_NICKNAME = 20;
+    private static final int MAX_SIZE_EMAIL = 20;
 
     @Override
     public LoginResponseDto login(PlayerDto playerDto) {
@@ -64,40 +67,132 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public RegisterResponseDto register(PlayerDto playerDto) {
-
-        if (doesPlayerWithNicknameExist(playerDto.getNickName())) {
-            return RegisterResponseDto.builder()
-                    .loginStatus(LoginStatus.REJECTED)
-                    .message("Nickname already exists!")
-                    .build();
-        }
-        if (doesPlayerWithEmailExist(playerDto.getEmail())) {
-            return RegisterResponseDto.builder()
-                    .loginStatus(LoginStatus.REJECTED)
-                    .message("Email already used!")
-                    .build();
-        }
-        if (!isEmailValid(playerDto.getEmail())) {
-            return RegisterResponseDto.builder()
-                    .loginStatus(LoginStatus.REJECTED)
-                    .message("Invalid email format!")
-                    .build();
-        }
-        if (playerDto.getPasswordHash().isEmpty()) {
-            return RegisterResponseDto.builder()
-                    .loginStatus(LoginStatus.REJECTED)
-                    .message("Password empty!")
-                    .build();
+        Optional<RegisterResponseDto> validationResponse = validateRegistration(playerDto);
+        if (validationResponse.isPresent()) {
+            return validationResponse.get();
         }
 
         Player createdPlayer = playerMapper.toEntity(playerDto);
-
         playerRepository.save(createdPlayer);
 
         return RegisterResponseDto.builder()
                 .loginStatus(LoginStatus.SUCCESS)
                 .build();
+    }
 
+    @Override
+    public LoginResponseDto createGame(GameRequestDto gameRequestDto) {
+        PlayerSession session = sessionService.getPlayerSession(gameRequestDto.getPlayerToken());
+        if (session == null) {
+            return LoginResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message("Invalid session token.")
+                    .build();
+        }
+
+        try {
+            gameService.createGame(gameRequestDto.getGameName(), session.getPlayerId());
+            return LoginResponseDto.builder()
+                    .loginStatus(LoginStatus.SUCCESS)
+                    .build();
+        } catch (IllegalStateException e) {
+            return LoginResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
+    @Override
+    public LoginResponseDto joinGame(GameRequestDto gameRequestDto) {
+        PlayerSession session = sessionService.getPlayerSession(gameRequestDto.getPlayerToken());
+        if (session == null) {
+            return LoginResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message("Invalid session token.")
+                    .build();
+        }
+
+        try {
+            gameService.joinGame(gameRequestDto.getGameName(), session.getPlayerId());
+            return LoginResponseDto.builder()
+                    .loginStatus(LoginStatus.SUCCESS)
+                    .build();
+        } catch (IllegalStateException e) {
+            return LoginResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
+    @Override
+    public LoginResponseDto leaveGame(GameRequestDto gameRequestDto) {
+        PlayerSession session = sessionService.getPlayerSession(gameRequestDto.getPlayerToken());
+        if (session == null) {
+            return LoginResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message("Invalid session token.")
+                    .build();
+        }
+
+        try {
+            gameService.leaveGame(gameRequestDto.getGameName(), session.getPlayerId());
+            return LoginResponseDto.builder()
+                    .loginStatus(LoginStatus.SUCCESS)
+                    .build();
+        } catch (IllegalStateException e) {
+            return LoginResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
+    private Optional<RegisterResponseDto> validateRegistration(PlayerDto playerDto) {
+        if (playerDto.getNickName().length() > MAX_SIZE_NICKNAME) {
+            return Optional.of(RegisterResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message("Nickname exceeds maximum length of " + MAX_SIZE_NICKNAME)
+                    .build());
+        }
+        if (playerDto.getEmail().length() > MAX_SIZE_EMAIL) {
+            return Optional.of(RegisterResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message("Email exceeds maximum length of " + MAX_SIZE_EMAIL)
+                    .build());
+        }
+        if (playerDto.getPasswordHash().length() > MAX_SIZE_NICKNAME) {
+            return Optional.of(RegisterResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message("Password exceeds maximum length of " + MAX_SIZE_NICKNAME)
+                    .build());
+        }
+        if (doesPlayerWithNicknameExist(playerDto.getNickName())) {
+            return Optional.of(RegisterResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message("Nickname already exists!")
+                    .build());
+        }
+        if (doesPlayerWithEmailExist(playerDto.getEmail())) {
+            return Optional.of(RegisterResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message("Email already used!")
+                    .build());
+        }
+        if (!isEmailValid(playerDto.getEmail())) {
+            return Optional.of(RegisterResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message("Invalid email format!")
+                    .build());
+        }
+        if (playerDto.getPasswordHash().isEmpty()) {
+            return Optional.of(RegisterResponseDto.builder()
+                    .loginStatus(LoginStatus.REJECTED)
+                    .message("Password empty!")
+                    .build());
+        }
+        return Optional.empty();
     }
 
     @Override

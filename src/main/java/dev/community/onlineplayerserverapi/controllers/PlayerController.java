@@ -36,4 +36,19 @@ public class PlayerController {
     public RegisterResponseDto register(@RequestBody PlayerDto playerDto) {
         return playerService.register(playerDto);
     }
+
+    @PostMapping("/game-create")
+    public LoginResponseDto createGame(@RequestBody GameRequestDto gameRequestDto) {
+        return playerService.createGame(gameRequestDto);
+    }
+
+    @PostMapping("/game-join")
+    public LoginResponseDto joinGame(@RequestBody GameRequestDto gameRequestDto) {
+        return playerService.joinGame(gameRequestDto);
+    }
+
+    @PostMapping("/game-leave")
+    public LoginResponseDto leaveGame(@RequestBody GameRequestDto gameRequestDto) {
+        return playerService.leaveGame(gameRequestDto);
+    }
 }

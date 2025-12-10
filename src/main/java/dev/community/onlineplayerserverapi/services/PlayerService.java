@@ -13,4 +13,10 @@ public interface PlayerService {
     boolean isPlayerExisting(String nickName);
 
     PlayerDetailsResponseDto getPlayerDetailsPage(PlayerDetailsRequestDto playerDetailsRequestDto);
+
+    LoginResponseDto createGame(GameRequestDto gameRequestDto);
+
+    LoginResponseDto joinGame(GameRequestDto gameRequestDto);
+
+    LoginResponseDto leaveGame(GameRequestDto gameRequestDto);
 }

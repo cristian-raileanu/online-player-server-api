@@ -57,4 +57,47 @@
                           startWith="1000"/>
     </changeSet>
 
+    <changeSet id="5" author="cristian-raileanu">
+        <createTable tableName="T_GAME">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(40)"/>
+            <column name="host_player_id" type="INT">
+                <constraints nullable="false" foreignKeyName="fk_game_host_player" references="T_PLAYER(id)"/>
+            </column>
+            <column name="start_time" type="timestamp"/>
+            <column name="end_time" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="6" author="cristian-raileanu">
+        <addAutoIncrement catalogName="online_players"
+                          columnDataType="bigint"
+                          columnName="id"
+                          tableName="T_GAME"
+                          startWith="1"/>
+    </changeSet>
+
+    <changeSet id="7" author="cristian-raileanu">
+        <createTable tableName="T_GAME_TEAM">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="game_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_game_team_game" references="T_GAME(id)"/>
+            </column>
+            <column name="player_ids" type="TEXT"/>
+            <column name="remaining_players" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="8" author="cristian-raileanu">
+        <addAutoIncrement catalogName="online_players"
+                          columnDataType="bigint"
+                          columnName="id"
+                          tableName="T_GAME_TEAM"
+                          startWith="1"/>
+    </changeSet>
+
 </databaseChangeLog>
