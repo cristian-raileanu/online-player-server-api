@@ -24,7 +24,9 @@ public class GameServiceImpl implements GameService {
     @Override
     @Transactional
     public Game createGame(String name, Long hostPlayerId) {
-        if (gameRepository.findFirstByNameOrderByStartTimeDesc(name).isPresent()) {
+        Optional<Game> foundGame = gameRepository.findFirstByNameOrderByStartTimeDesc(name)
+                .filter(game -> game.getEndTime() == null);
+        if (foundGame.isPresent()) {
             throw new IllegalStateException("A game with this name already exists.");
         }
 
@@ -46,6 +48,7 @@ public class GameServiceImpl implements GameService {
     @Transactional
     public Game joinGame(String name, Long playerId) {
         Game game = gameRepository.findFirstByNameOrderByStartTimeDesc(name)
+                .filter(foundGame -> foundGame.getEndTime() == null)
                 .orElseThrow(() -> new IllegalStateException("Game not found."));
 
         boolean playerAlreadyInGame = game.getGameTeams().stream()
@@ -65,6 +68,7 @@ public class GameServiceImpl implements GameService {
     @Transactional
     public void leaveGame(String name, Long playerId) {
         Game game = gameRepository.findFirstByNameOrderByStartTimeDesc(name)
+                .filter(foundGame -> foundGame.getEndTime() == null)
                 .orElseThrow(() -> new IllegalStateException("Game not found."));
 
         Optional<GameTeam> activeTeamOpt = game.getGameTeams().stream()
