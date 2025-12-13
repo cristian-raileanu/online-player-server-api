@@ -2,6 +2,8 @@ package dev.community.onlineplayerserverapi.services;
 
 import dev.community.onlineplayerserverapi.entities.Game;
 import dev.community.onlineplayerserverapi.entities.GameTeam;
+import dev.community.onlineplayerserverapi.models.GameDetailsResponseDto;
+import dev.community.onlineplayerserverapi.models.PlayerDetailsRequestDto;
 import dev.community.onlineplayerserverapi.repositories.GameRepository;
 import dev.community.onlineplayerserverapi.repositories.GameTeamRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -140,5 +143,21 @@ class GameServiceImplTest {
         when(gameRepository.findFirstByNameOrderByStartTimeDesc(anyString())).thenReturn(Optional.empty());
 
         assertThrows(IllegalStateException.class, () -> gameService.leaveGame("Test Game", 100L));
+    }
+
+    @Test
+    void getGameDetails_success() {
+        game.getGameTeams().add(team1);
+        game.setEndTime(LocalDateTime.now().plusHours(1));
+        when(gameRepository.findAll()).thenReturn(List.of(game));
+        PlayerDetailsRequestDto requestDto = new PlayerDetailsRequestDto();
+        requestDto.setIncludes(Set.of("gameName", "duration", "startTime", "endTime", "teamsDetails"));
+
+        GameDetailsResponseDto response = gameService.getGameDetails(requestDto);
+
+        assertNotNull(response);
+        assertEquals(1, response.getTotalNumber());
+        assertEquals("Test Game", response.getGameDetails().get(0).getGameName());
+        assertNotNull(response.getGameDetails().get(0).getDuration());
     }
 }

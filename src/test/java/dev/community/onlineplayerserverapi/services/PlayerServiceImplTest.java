@@ -12,7 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -235,5 +238,28 @@ class PlayerServiceImplTest {
 
         assertEquals(LoginStatus.REJECTED, response.getLoginStatus());
         assertEquals("Game not found.", response.getMessage());
+    }
+
+    @Test
+    void getGameDetails_success() {
+        PlayerDetailsRequestDto requestDto = new PlayerDetailsRequestDto();
+        requestDto.setIncludes(Set.of("teamsDetails"));
+
+        GameTeamDetailsDto teamDetailsDto = new GameTeamDetailsDto();
+        teamDetailsDto.setPlayers(List.of("1", "2"));
+
+        GameDetailsDto gameDetailsDto = new GameDetailsDto();
+        gameDetailsDto.setTeamsDetails(Collections.singletonList(teamDetailsDto));
+
+        GameDetailsResponseDto responseDto = new GameDetailsResponseDto();
+        responseDto.setGameDetails(Collections.singletonList(gameDetailsDto));
+
+        when(gameService.getGameDetails(requestDto)).thenReturn(responseDto);
+        when(playerRepository.findAllById(any()))
+                .thenReturn(Collections.singletonList(player));
+
+        GameDetailsResponseDto result = playerService.getGameDetails(requestDto);
+
+        assertEquals(player.getNickName(), result.getGameDetails().get(0).getTeamsDetails().get(0).getPlayers().get(0));
     }
 }

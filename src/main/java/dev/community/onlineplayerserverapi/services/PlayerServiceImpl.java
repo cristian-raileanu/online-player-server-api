@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -147,6 +148,27 @@ public class PlayerServiceImpl implements PlayerService {
                     .message(e.getMessage())
                     .build();
         }
+    }
+
+    @Override
+    public GameDetailsResponseDto getGameDetails(PlayerDetailsRequestDto playerDetailsRequestDto) {
+        GameDetailsResponseDto gameDetails = gameService.getGameDetails(playerDetailsRequestDto);
+
+        Set<String> includedFields = playerDetailsRequestDto.getIncludes() != null ?
+                playerDetailsRequestDto.getIncludes() : Set.of();
+        if (includedFields.contains("teamsDetails")) {
+            gameDetails.getGameDetails().forEach(game -> {
+                if (game.getTeamsDetails() != null) {
+                    game.getTeamsDetails().forEach(team -> {
+                        List<Long> playerIds = team.getPlayers().stream().map(Long::valueOf).collect(Collectors.toList());
+                        List<Player> players = playerRepository.findAllById(playerIds);
+                        team.setPlayers(players.stream().map(Player::getNickName).collect(Collectors.toList()));
+                    });
+                }
+            });
+        }
+
+        return gameDetails;
     }
 
     private Optional<RegisterResponseDto> validateRegistration(PlayerDto playerDto) {

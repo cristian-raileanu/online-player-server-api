@@ -51,4 +51,9 @@ public class PlayerController {
     public LoginResponseDto leaveGame(@RequestBody GameRequestDto gameRequestDto) {
         return playerService.leaveGame(gameRequestDto);
     }
+
+    @GetMapping("/game-details")
+    public GameDetailsResponseDto getGameDetails(@RequestBody PlayerDetailsRequestDto playerDetailsRequestDto) {
+        return playerService.getGameDetails(playerDetailsRequestDto);
+    }
 }

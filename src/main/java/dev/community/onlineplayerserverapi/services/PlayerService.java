@@ -19,4 +19,6 @@ public interface PlayerService {
     LoginResponseDto joinGame(GameRequestDto gameRequestDto);
 
     LoginResponseDto leaveGame(GameRequestDto gameRequestDto);
+
+    GameDetailsResponseDto getGameDetails(PlayerDetailsRequestDto playerDetailsRequestDto);
 }
