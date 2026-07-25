@@ -9,4 +9,6 @@ public interface GameService {
     Game joinGame(String name, Long playerId);
     void leaveGame(String name, Long playerId);
     GameDetailsResponseDto getGameDetails(PlayerDetailsRequestDto playerDetailsRequestDto);
+
+    int getGamesPlayed(Long playerId);
 }

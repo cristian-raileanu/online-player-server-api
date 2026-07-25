@@ -52,7 +52,9 @@ public class GameServiceImpl implements GameService {
     @Transactional
     public Game joinGame(String name, Long playerId) {
         Game game = gameRepository.findFirstByNameOrderByStartTimeDesc(name)
-                .filter(foundGame -> foundGame.getEndTime() == null)
+                .filter(foundGame -> foundGame.getEndTime() == null &&
+                        // avoid false signals
+                        LocalDateTime.now().isBefore(foundGame.getStartTime().plusMinutes(10)))
                 .orElseThrow(() -> new IllegalStateException("Game not found."));
 
         boolean playerAlreadyInGame = game.getGameTeams().stream()
@@ -102,6 +104,7 @@ public class GameServiceImpl implements GameService {
                 playerDetailsRequestDto.getIncludes() : Set.of();
 
         List<GameDetailsDto> gameDetailsDtos = games.stream()
+                .filter(game -> game.getGameTeams().size() >= 2)
                 .map(game -> mapGameToDetailsDto(game, includedFields))
                 .collect(Collectors.toList());
 
@@ -110,6 +113,11 @@ public class GameServiceImpl implements GameService {
         responseDto.setTotalNumber(gameDetailsDtos.size());
 
         return responseDto;
+    }
+
+    @Override
+    public int getGamesPlayed(Long playerId) {
+        return 0;
     }
 
     private GameDetailsDto mapGameToDetailsDto(Game game, Set<String> includedFields) {

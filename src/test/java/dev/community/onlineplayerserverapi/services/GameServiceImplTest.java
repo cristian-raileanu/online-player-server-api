@@ -148,6 +148,7 @@ class GameServiceImplTest {
     @Test
     void getGameDetails_success() {
         game.getGameTeams().add(team1);
+        game.getGameTeams().add(team2);
         game.setEndTime(LocalDateTime.now().plusHours(1));
         when(gameRepository.findAll()).thenReturn(List.of(game));
         PlayerDetailsRequestDto requestDto = new PlayerDetailsRequestDto();
